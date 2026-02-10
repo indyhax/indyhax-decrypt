@@ -1,0 +1,57 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IndyHAX â€¢ Decrypt</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:900px;margin:40px auto;padding:0 16px}
+    .card{border:1px solid #ddd;border-radius:12px;padding:18px;background:#fff}
+    textarea{width:100%;min-height:110px;padding:12px;border-radius:10px;border:1px solid #ddd;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    input{padding:10px 12px;border-radius:10px;border:1px solid #ddd;width:min(520px,100%)}
+    button{padding:10px 12px;border-radius:10px;border:1px solid #111;background:#111;color:#fff;margin-top:10px}
+    .muted{color:#666}
+    #out{margin-top:14px;padding:12px;border-radius:10px;background:#f6f8fa;border:1px solid #e5e7eb;min-height:48px}
+  </style>
+</head>
+<body>
+  <h1>IndyHAX CTF â€” Decrypt</h1>
+  <div class="card">
+    <p class="muted">Ciphertext (Base64):</p>
+    <textarea id="ct" readonly>ICAgICAgIBIWCws3ABYNMQYYGwROXTENCjcPFx0xARcLEwEZGg0WBhw=</textarea>
+
+    <p class="muted">Enter key and decrypt:</p>
+    <input id="key" placeholder="key" />
+    <div><button id="go">Decrypt</button></div>
+
+    <div class="muted" style="margin-top:10px">Hint: the key is a simple word related to the org name.</div>
+    <div id="out"></div>
+  </div>
+
+  <script>
+    function b64ToBytes(b64){
+      const bin = atob(b64);
+      const arr = new Uint8Array(bin.length);
+      for (let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+      return arr;
+    }
+    function xorDecrypt(b64, key){
+      const ct = b64ToBytes(b64);
+      const k = new TextEncoder().encode(key);
+      const pt = new Uint8Array(ct.length);
+      for (let i=0;i<ct.length;i++) pt[i] = ct[i] ^ k[i % k.length];
+      return new TextDecoder().decode(pt);
+    }
+
+    document.querySelector('#go').addEventListener('click', () => {
+      const b64 = document.querySelector('#ct').value.trim();
+      const key = document.querySelector('#key').value;
+      try {
+        document.querySelector('#out').textContent = xorDecrypt(b64, key);
+      } catch (e) {
+        document.querySelector('#out').textContent = 'Decryption failed.';
+      }
+    });
+  </script>
+</body>
+</html>
